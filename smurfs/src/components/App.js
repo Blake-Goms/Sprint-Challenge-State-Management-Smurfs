@@ -1,16 +1,72 @@
-import React, { Component } from "react";
-import "./App.css";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { getSmurfs, addSmurf } from '../actions'
+import SmurfList from './SmurfList';
+import './App.css';
+
 class App extends Component {
+    state = {
+      name: '',
+      age: '',
+      height: ''
+    }
+  
+  componentDidMount() {
+    this.props.getSmurfs()
+  }
+
+  changeHandler = e => {
+    this.setState({ [e.target.name]: e.target.value })
+  }
+
+  submitHandler = e => {
+    e.preventDefault();
+    const newSmurf = {
+      name: this.state.name,
+      age: this.state.age,
+      height: this.state.height
+    }
+    this.props.addSmurf(newSmurf);
+    this.setState({ name: '', age: '', height: '' })
+  }
+
   render() {
+    if (this.props.fetchingSmurfs) {
+      return <p>LOADING VILLAGERS...</p>
+    }
     return (
       <div className="App">
-        <h1>SMURFS! 2.0 W/ Redux</h1>
-        <div>Welcome to your state management version of Smurfs!</div>
-        <div>Start inside of your `src/index.js` file!</div>
-        <div>Have fun!</div>
+        <form onSubmit={this.submitHandler}>
+          <input type='text'
+            placeholder='Name' 
+            name='name' 
+            value={this.state.name} 
+            onChange={this.changeHandler}
+          />
+          <input type='text'
+            placeholder='Age'
+            name='age' 
+            value={this.state.age} 
+            onChange={this.changeHandler} 
+          />
+          <input type='text' 
+            placeholder='Height' 
+            name='height' 
+            value={this.state.height} 
+            onChange={this.changeHandler} 
+          />
+          <button>Add Smurf</button>
+        </form>
+        <SmurfList smurfs={this.props.smurfs} />
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => ({
+  smurfs: state.smurfs,
+  fetchingSmurfs: state.fetchingSmurfs,
+  error: state.error
+})
+
+export default connect(mapStateToProps, { getSmurfs, addSmurf })(App); 
